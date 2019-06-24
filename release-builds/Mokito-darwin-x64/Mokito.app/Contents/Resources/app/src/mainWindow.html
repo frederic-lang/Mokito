@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mokito</title>
+  <link rel="stylesheet" href="../node_modules/codemirror/lib/codemirror.css">
+  <link rel="stylesheet" href="../node_modules/photonkit/dist/css/photon.css">
+
+  <style>
+    html {
+      height: 100%;
+    }
+    body {
+      background-color: #eee;
+      margin: 0;
+      height: 100%;
+    }
+    div#codeeditor {
+      position: relative;
+      height: 100%;
+      min-height: 100vh;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="window">
+    <header class="toolbar toolbar-header">
+      <div class="toolbar-actions">
+          <button class="btn btn-default">
+              <span class="icon icon-rocket"></span>
+          </button>
+          <div class="btn-group">
+            <button class="btn btn-default" id="buttonSave">
+              <span class="icon icon-box"></span>
+            </button>
+            <button class="btn btn-default" id="buttonOpen">
+              <span class="icon icon-folder"></span>
+            </button>
+          </div>
+    </header>
+    <div class="window-content">
+      <div class="pane">
+        <div id="codeeditor"></div>
+      </div>
+    </div>
+  </div>
+
+<!-- Create a simple CodeMirror instance -->
+<script>
+  const codeMirror = require('codemirror');
+  const electron = require('electron');
+  const {ipcRenderer} = electron;
+  require('codemirror/mode/mllike/mllike');
+  
+
+  var editor = codeMirror(document.getElementById("codeeditor"), {
+    mode: "text/x-ocaml", 
+    lineNumbers: true,
+    tabSize: 4,
+    extraKeys: {
+      "Ctrl-Space": "selectAll",
+      "Ctrl-U" : "delLineLeft",
+      "Ctrl-I" : "autocomplete"
+      }
+  });
+
+  editor.setSize('100%', '100%');
+
+  var filename = "";
+
+  ipcRenderer.on('getFileContent', function(event){
+    event.sender.send('fileContent', editor.getValue());
+  });
+
+  ipcRenderer.on('getFilename', function(event){
+//    console.log('get filename : ' + filename );
+    event.sender.send('filename', filename);
+  });
+
+  ipcRenderer.on('setContent', function(event, content){
+    editor.setValue(content);
+  });
+
+  ipcRenderer.on('setFilename', function(event, newFilename){
+    filename = newFilename;
+    document.title = " Mokito -- " + filename;
+  });  
+
+
+  var buttonSave = document.getElementById("buttonSave");
+  var buttonOpen = document.getElementById("buttonOpen");
+
+  buttonSave.addEventListener("click", () => {
+    console.log("button save clicked");
+    ipcRenderer.send('save', filename);
+  });
+  buttonOpen.addEventListener("click", () => {
+    console.log("button open clicked");
+    ipcRenderer.send('open');
+  });
+</script>
+</body>
+</html>
