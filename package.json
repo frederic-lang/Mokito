@@ -13,7 +13,7 @@
   "license": "MIT",
   "dependencies": {
     "codemirror": "^5.45.0",
-    "electron": "^4.1.1",
+    "electron": "^7.2.4",
     "photonkit": "^0.1.2"
   },
   "devDependencies": {
